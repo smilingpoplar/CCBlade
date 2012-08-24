@@ -146,7 +146,7 @@ CCBlade::CCBlade(const char *filePath, float stroke, int pointLimit)
 
 CCBlade* CCBlade::create(const char *filePath, float stroke, int pointLimit)
 {
-    CCBlade* pRet = new CCBlade(filePath, stroke, pointLimit);
+    auto pRet = new CCBlade(filePath, stroke, pointLimit);
 	pRet->autorelease();
 	return pRet;
 }

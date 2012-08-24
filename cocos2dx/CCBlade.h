@@ -43,8 +43,8 @@ private:
     // shader stuff
     GLint _uniformColor;
 private:
-    ~CCBlade();
     CCBlade(const char *filePath, float stroke, int pointLimit);
+    virtual ~CCBlade();
     void populateVertices();
     void pop(int count);
     void popLastOne(float delta);

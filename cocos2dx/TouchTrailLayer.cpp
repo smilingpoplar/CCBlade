@@ -26,6 +26,9 @@
 
 #include "TouchTrailLayer.h"
 #include "CCBlade.h"
+
+#define kFileStreak "streak.png"
+
 USING_NS_CC;
 
 TouchTrailLayer::TouchTrailLayer()
@@ -44,7 +47,7 @@ void TouchTrailLayer::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
 {
     for (CCSetIterator it = pTouches->begin(); it != pTouches->end(); it++) {
         CCTouch *touch = (CCTouch *)*it;
-		CCBlade *blade = CCBlade::create("streak.png", 4, 50);
+		CCBlade *blade = CCBlade::create(kFileStreak, 4, 50);
         _map[touch] = blade;
 		addChild(blade);
         
@@ -61,8 +64,9 @@ void TouchTrailLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent)
 {
     for (CCSetIterator it = pTouches->begin(); it != pTouches->end(); it++) {
         CCTouch *touch = (CCTouch *)*it;
-        CCBlade *blade = _map[touch];
+        if (_map.find(touch) == _map.end()) continue;
         
+        CCBlade *blade = _map[touch];
         CCPoint point = convertTouchToNodeSpace(touch);
 		blade->push(point);
     }
@@ -72,8 +76,9 @@ void TouchTrailLayer::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent)
 {
     for (CCSetIterator it = pTouches->begin(); it != pTouches->end(); it++) {
         CCTouch *touch = (CCTouch *)*it;
-        CCBlade *blade = _map[touch];
+        if (_map.find(touch) == _map.end()) continue;
         
+        CCBlade *blade = _map[touch];
         blade->autoCleanup();
         _map.erase(touch);
     }

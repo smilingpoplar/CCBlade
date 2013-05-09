@@ -32,7 +32,7 @@
 typedef cocos2d::ccVertex2F CGPoint;
 #define cgp(__X__, __Y__) vertex2(__X__, __Y__)
 
-class CCBlade : public cocos2d::CCNode, public cocos2d::CCRGBAProtocol {
+class CCBlade : public cocos2d::CCNodeRGBA {
 private:
     CC_SYNTHESIZE_RETAIN(cocos2d::CCTexture2D *, _texture, Texture);
     int _pointLimit;
@@ -52,11 +52,6 @@ private:
 public:
     CC_PROPERTY(float, _stroke, Stroke);
     CC_PROPERTY(float, _drainInterval, DrainInterval);
-    // CCRGBAProtocol
-    CC_PROPERTY_PASS_BY_REF(cocos2d::ccColor3B, _color, Color);
-    CC_PROPERTY(GLubyte, _opacity, Opacity);
-    virtual void setOpacityModifyRGB(bool bValue) {CC_UNUSED_PARAM(bValue);}
-    virtual bool isOpacityModifyRGB(void) { return false;}
 public:
     static CCBlade* create(const char *filePath, float stroke, int pointLimit);
     void push(const cocos2d::CCPoint &point);

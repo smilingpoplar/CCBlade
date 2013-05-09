@@ -125,8 +125,8 @@ CCBlade::~CCBlade()
 CCBlade::CCBlade(const char *filePath, float stroke, int pointLimit)
 : _texture(NULL)
 {
-    _color = ccWHITE;
-    _opacity = 255;
+    setColor(ccWHITE);
+    setOpacity(255);
     setTexture(CCTextureCache::sharedTextureCache()->addImage(filePath));
     setStroke(stroke);
     CCAssert(pointLimit >= POINT_LIMIT_MIN, "point limit should be >= POINT_LIMIT_MIN");
@@ -146,8 +146,8 @@ CCBlade::CCBlade(const char *filePath, float stroke, int pointLimit)
 CCBlade* CCBlade::create(const char *filePath, float stroke, int pointLimit)
 {
     CCBlade* pRet = new CCBlade(filePath, stroke, pointLimit);
-	pRet->autorelease();
-	return pRet;
+        pRet->autorelease();
+        return pRet;
 }
 
 void CCBlade::populateVertices()
@@ -263,9 +263,8 @@ void CCBlade::draw()
     }
     
     CC_NODE_DRAW_SETUP();
-    
     ccGLEnableVertexAttribs(kCCVertexAttribFlag_Position | kCCVertexAttribFlag_TexCoords);
-    GLfloat color[4] = { _color.r/255.0f, _color.g/255.0f, _color.b/255.0f, _opacity/255.0f };
+    GLfloat color[4] = { getColor().r/255.0f, getColor().g/255.0f, getColor().b/255.0f, getOpacity()/255.0f };
     getShaderProgram()->setUniformLocationWith4fv(_uniformColor, color, 1);
     ccGLBindTexture2D(_texture->getName());
     
@@ -274,26 +273,4 @@ void CCBlade::draw()
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 2*_path.size()-2);
     
     CC_INCREMENT_GL_DRAWS(1);
-}
-
-// CCRGBAProtocol
-
-ccColor3B CCBlade::getColor()
-{
-    return _color;
-}
-
-void CCBlade::setColor(const ccColor3B &color)
-{
-    _color = color;
-}
-
-GLubyte CCBlade::getOpacity()
-{
-    return _opacity;
-}
-
-void CCBlade::setOpacity(GLubyte opacity)
-{
-    _opacity = opacity;
 }

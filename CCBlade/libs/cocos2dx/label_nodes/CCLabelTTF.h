@@ -37,34 +37,29 @@ NS_CC_BEGIN
  * @{
  */
 
+
+
 /** @brief CCLabelTTF is a subclass of CCTextureNode that knows how to render text labels
-*
-* All features from CCTextureNode are valid in CCLabelTTF
-*
-* CCLabelTTF objects are slow. Consider using CCLabelAtlas or CCLabelBMFont instead.
-*/
+ *
+ * All features from CCTextureNode are valid in CCLabelTTF
+ *
+ * CCLabelTTF objects are slow. Consider using CCLabelAtlas or CCLabelBMFont instead.
+ *
+ * Custom ttf file can be put in assets/ or external storage that the Application can access.
+ * @code
+ * CCLabelTTF *label1 = CCLabelTTF::create("alignment left", "A Damn Mess", fontSize, blockSize, 
+ *                                          kCCTextAlignmentLeft, kCCVerticalTextAlignmentCenter);
+ * CCLabelTTF *label2 = CCLabelTTF::create("alignment right", "/mnt/sdcard/Scissor Cuts.ttf", fontSize, blockSize,
+ *                                          kCCTextAlignmentLeft, kCCVerticalTextAlignmentCenter);
+ * @endcode
+ *
+ */
 class CC_DLL CCLabelTTF : public CCSprite, public CCLabelProtocol
 {
 public:
     CCLabelTTF();
     virtual ~CCLabelTTF();
     const char* description();    
-    
-    /** creates a CCLabelTTF with a font name and font size in points
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCLabelTTF * labelWithString(const char *string, const char *fontName, float fontSize);
-    
-    /** creates a CCLabelTTF from a fontname, horizontal alignment, dimension in points,  and font size in points.
-     @deprecated: This interface will be deprecated sooner or later.
-     @since v1.0
-     */
-    CC_DEPRECATED_ATTRIBUTE static CCLabelTTF * labelWithString(const char *string, const CCSize& dimensions, CCTextAlignment hAlignment, const char *fontName, float fontSize);
-    
-    /** creates a CCLabel from a fontname, alignment, dimension in points and font size in points
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCLabelTTF * labelWithString(const char *string, const CCSize& dimensions, CCTextAlignment hAlignment, CCVerticalTextAlignment vAlignment, const char *fontName, float fontSize);
     
     /** creates a CCLabelTTF with a font name and font size in points
      @since v2.0.1
@@ -84,6 +79,10 @@ public:
                                const CCSize& dimensions, CCTextAlignment hAlignment, 
                                CCVerticalTextAlignment vAlignment);
     
+    
+    /** Create a lable with string and a font definition*/
+    static CCLabelTTF * createWithFontDefinition(const char *string, ccFontDefinition &textDefinition);
+    
     /** initializes the CCLabelTTF with a font name and font size */
     bool initWithString(const char *string, const char *fontName, float fontSize);
     
@@ -96,11 +95,36 @@ public:
                         const CCSize& dimensions, CCTextAlignment hAlignment, 
                         CCVerticalTextAlignment vAlignment);
     
+    /** initializes the CCLabelTTF with a font name, alignment, dimension and font size */
+    bool initWithStringAndTextDefinition(const char *string, ccFontDefinition &textDefinition);
+    
+    /** set the text definition used by this label */
+    void setTextDefinition(ccFontDefinition *theDefinition);
+    
+    /** get the text definition used by this label */
+    ccFontDefinition * getTextDefinition();
+    
+    
+    
+    /** enable or disable shadow for the label */
+    void enableShadow(const CCSize &shadowOffset, float shadowOpacity, float shadowBlur, bool mustUpdateTexture = true);
+    
+    /** disable shadow rendering */
+    void disableShadow(bool mustUpdateTexture = true);
+    
+    /** enable or disable stroke */
+    void enableStroke(const ccColor3B &strokeColor, float strokeSize, bool mustUpdateTexture = true);
+    
+    /** disable stroke */
+    void disableStroke(bool mustUpdateTexture = true);
+    
+    /** set text tinting */
+    void setFontFillColor(const ccColor3B &tintColor, bool mustUpdateTexture = true);
+
+    
+    
     /** initializes the CCLabelTTF */
     bool init();
-    /** Creates an label.
-     */
-    static CCLabelTTF * node();
 
     /** Creates an label.
      */
@@ -126,10 +150,15 @@ public:
     
     const char* getFontName();
     void setFontName(const char *fontName);
-
+    
 private:
     bool updateTexture();
 protected:
+    
+    /** set the text definition for this label */
+    void                _updateWithTextDefinition(ccFontDefinition & textDefinition, bool mustUpdateTexture = true);
+    ccFontDefinition    _prepareTextDefinition(bool adjustForResolution = false);
+    
     /** Dimensions of the label in Points */
     CCSize m_tDimensions;
     /** The alignment of the label */
@@ -140,8 +169,25 @@ protected:
     std::string * m_pFontName;
     /** Font size of the label */
     float m_fFontSize;
-    
+    /** label's string */
     std::string m_string;
+    
+    /** font shadow */
+    bool    m_shadowEnabled;
+    CCSize  m_shadowOffset;
+    float   m_shadowOpacity;
+    float   m_shadowBlur;
+    
+    
+    /** font stroke */
+    bool        m_strokeEnabled;
+    ccColor3B   m_strokeColor;
+    float       m_strokeSize;
+        
+    /** font tint */
+    ccColor3B   m_textFillColor;
+
+    
 };
 
 

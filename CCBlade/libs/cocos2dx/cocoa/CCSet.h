@@ -45,6 +45,11 @@ public:
     virtual ~CCSet(void);
 
     /**
+    * @brief Create and return a new empty set.
+    */
+    static CCSet * create();
+
+    /**
     *@brief Return a copy of the CCSet, it will copy all the elements.
     */
     CCSet* copy();
@@ -65,6 +70,10 @@ public:
     */
     void removeObject(CCObject *pObject);
     /**
+     *@brief Remove all elements of the set
+     */
+    void removeAllObjects();
+    /**
     *@brief Check if CCSet contains a element equals pObject.
     */
     bool containsObject(CCObject *pObject);
@@ -80,6 +89,8 @@ public:
     *@brief Return the first element if it contains elements, or null if it doesn't contain any element.
     */
     CCObject* anyObject();
+
+    virtual void acceptVisitor(CCDataVisitor &visitor);
 
 private:
     std::set<CCObject *> *m_pSet;

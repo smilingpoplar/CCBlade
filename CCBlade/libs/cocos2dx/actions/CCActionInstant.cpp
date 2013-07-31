@@ -74,10 +74,6 @@ CCFiniteTimeAction * CCActionInstant::reverse() {
 //
 // Show
 //
-CCShow* CCShow::action() 
-{
-    return CCShow::create();
-}
 
 CCShow* CCShow::create() 
 {
@@ -118,11 +114,6 @@ CCObject* CCShow::copyWithZone(CCZone *pZone) {
 //
 // Hide
 //
-CCHide * CCHide::action() 
-{
-    return CCHide::create();
-}
-
 CCHide * CCHide::create() 
 {
     CCHide *pRet = new CCHide();
@@ -162,11 +153,6 @@ CCObject* CCHide::copyWithZone(CCZone *pZone) {
 //
 // ToggleVisibility
 //
-CCToggleVisibility * CCToggleVisibility::action()
-{
-    return CCToggleVisibility::create();
-}
-
 CCToggleVisibility * CCToggleVisibility::create()
 {
     CCToggleVisibility *pRet = new CCToggleVisibility();
@@ -203,12 +189,53 @@ CCObject* CCToggleVisibility::copyWithZone(CCZone *pZone)
 }
 
 //
+// Remove Self
+//
+CCRemoveSelf * CCRemoveSelf::create(bool isNeedCleanUp /*= true*/) 
+{
+	CCRemoveSelf *pRet = new CCRemoveSelf();
+
+	if (pRet && pRet->init(isNeedCleanUp)) {
+		pRet->autorelease();
+	}
+
+	return pRet;
+}
+
+bool CCRemoveSelf::init(bool isNeedCleanUp) {
+	m_bIsNeedCleanUp = isNeedCleanUp;
+	return true;
+}
+
+void CCRemoveSelf::update(float time) {
+	CC_UNUSED_PARAM(time);
+	m_pTarget->removeFromParentAndCleanup(m_bIsNeedCleanUp);
+}
+
+CCFiniteTimeAction *CCRemoveSelf::reverse() {
+	return (CCFiniteTimeAction*) (CCRemoveSelf::create(m_bIsNeedCleanUp));
+}
+
+CCObject* CCRemoveSelf::copyWithZone(CCZone *pZone) {
+	CCZone *pNewZone = NULL;
+	CCRemoveSelf *pRet = NULL;
+
+	if (pZone && pZone->m_pCopyObject) {
+		pRet = (CCRemoveSelf*) (pZone->m_pCopyObject);
+	} else {
+		pRet = new CCRemoveSelf();
+		pZone = pNewZone = new CCZone(pRet);
+	}
+
+	CCActionInstant::copyWithZone(pZone);
+	pRet->init(m_bIsNeedCleanUp);
+	CC_SAFE_DELETE(pNewZone);
+	return pRet;
+}
+
+//
 // FlipX
 //
-CCFlipX *CCFlipX::actionWithFlipX(bool x) 
-{
-    return CCFlipX::create(x);
-}
 
 CCFlipX *CCFlipX::create(bool x)
 {
@@ -257,10 +284,6 @@ CCObject * CCFlipX::copyWithZone(CCZone *pZone) {
 //
 // FlipY
 //
-CCFlipY * CCFlipY::actionWithFlipY(bool y)
-{
-    return CCFlipY::create(y);
-}
 
 CCFlipY * CCFlipY::create(bool y)
 {
@@ -309,10 +332,6 @@ CCObject* CCFlipY::copyWithZone(CCZone *pZone) {
 //
 // Place
 //
-CCPlace* CCPlace::actionWithPosition(const CCPoint& pos)
-{
-    return CCPlace::create(pos);
-}
 
 CCPlace* CCPlace::create(const CCPoint& pos)
 {
@@ -357,12 +376,6 @@ void CCPlace::update(float time) {
 //
 // CallFunc
 //
-
-CCCallFunc * CCCallFunc::actionWithTarget(CCObject* pSelectorTarget, SEL_CallFunc selector) 
-{
-    return CCCallFunc::create(pSelectorTarget, selector);
-}
-
 CCCallFunc * CCCallFunc::create(CCObject* pSelectorTarget, SEL_CallFunc selector) 
 {
     CCCallFunc *pRet = new CCCallFunc();
@@ -430,6 +443,9 @@ CCObject * CCCallFunc::copyWithZone(CCZone *pZone) {
     CCActionInstant::copyWithZone(pZone);
     pRet->initWithTarget(m_pSelectorTarget);
     pRet->m_pCallFunc = m_pCallFunc;
+    if (m_nScriptHandler > 0 ) {
+        pRet->m_nScriptHandler = cocos2d::CCScriptEngineManager::sharedManager()->getScriptEngine()->reallocateScriptHandler(m_nScriptHandler);
+    }
     CC_SAFE_DELETE(pNewZone);
     return pRet;
 }
@@ -458,11 +474,6 @@ void CCCallFuncN::execute() {
 	if (m_nScriptHandler) {
 		CCScriptEngineManager::sharedManager()->getScriptEngine()->executeCallFuncActionEvent(this, m_pTarget);
 	}
-}
-
-CCCallFuncN * CCCallFuncN::actionWithTarget(CCObject* pSelectorTarget, SEL_CallFuncN selector)
-{
-    return CCCallFuncN::create(pSelectorTarget, selector);
 }
 
 CCCallFuncN * CCCallFuncN::create(CCObject* pSelectorTarget, SEL_CallFuncN selector)
@@ -524,10 +535,6 @@ CCObject * CCCallFuncN::copyWithZone(CCZone* zone) {
 //
 // CallFuncND
 //
-CCCallFuncND * CCCallFuncND::actionWithTarget(CCObject* pSelectorTarget, SEL_CallFuncND selector, void* d) 
-{
-    return CCCallFuncND::create(pSelectorTarget, selector, d);
-}
 
 CCCallFuncND * CCCallFuncND::create(CCObject* pSelectorTarget, SEL_CallFuncND selector, void* d)
 {
@@ -592,11 +599,6 @@ void CCCallFuncO::execute() {
     if (m_pCallFuncO) {
         (m_pSelectorTarget->*m_pCallFuncO)(m_pObject);
     }
-}
-
-CCCallFuncO * CCCallFuncO::actionWithTarget(CCObject* pSelectorTarget, SEL_CallFuncO selector, CCObject* pObject)
-{
-    return CCCallFuncO::create(pSelectorTarget, selector, pObject);
 }
 
 CCCallFuncO * CCCallFuncO::create(CCObject* pSelectorTarget, SEL_CallFuncO selector, CCObject* pObject)

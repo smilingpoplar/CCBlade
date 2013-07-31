@@ -45,7 +45,7 @@ public:
     @brief    If the sender doesn't want to attach to the IME, return true;
     */
     virtual bool onTextFieldAttachWithIME(CCTextFieldTTF * sender)
-    { 
+    {
         CC_UNUSED_PARAM(sender);
         return false;
     }
@@ -124,10 +124,10 @@ public:
     //////////////////////////////////////////////////////////////////////////
     // properties
     //////////////////////////////////////////////////////////////////////////
-    
+
     CC_SYNTHESIZE(CCTextFieldDelegate *, m_pDelegate, Delegate);
     CC_SYNTHESIZE_READONLY(int, m_nCharCount, CharCount);
-    virtual ccColor3B getColorSpaceHolder();
+    virtual const ccColor3B& getColorSpaceHolder();
     virtual void setColorSpaceHolder(const ccColor3B& color);
 
     // input text property
@@ -145,6 +145,11 @@ public:
 protected:
     std::string * m_pPlaceHolder;
     ccColor3B m_ColorSpaceHolder;
+public:
+    virtual void setSecureTextEntry(bool value);
+    virtual bool isSecureTextEntry();
+protected:
+    bool m_bSecureTextEntry;
 protected:
 
     virtual void draw();

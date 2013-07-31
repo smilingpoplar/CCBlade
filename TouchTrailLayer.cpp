@@ -68,6 +68,7 @@ void TouchTrailLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent)
         
         CCBlade *blade = _map[touch];
         CCPoint point = convertTouchToNodeSpace(touch);
+        point = ccpAdd(ccpMult(point, 0.5f), ccpMult(touch->getPreviousLocation(), 0.5f));
 		blade->push(point);
     }
 }

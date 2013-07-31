@@ -29,6 +29,9 @@ THE SOFTWARE.
 #include "textures/CCTexture2D.h"
 #include "ccTypes.h"
 #include "base_nodes/CCNode.h"
+#ifdef EMSCRIPTEN
+#include "base_nodes/CCGLBufferedNode.h"
+#endif // EMSCRIPTEN
 
 NS_CC_BEGIN
 
@@ -40,19 +43,14 @@ NS_CC_BEGIN
 /** MotionStreak.
  Creates a trailing path.
  */
-class CC_DLL CCMotionStreak : public CCNode, public CCTextureProtocol, public CCRGBAProtocol
+class CC_DLL CCMotionStreak : public CCNodeRGBA, public CCTextureProtocol
+#ifdef EMSCRIPTEN
+, public CCGLBufferedNode
+#endif // EMSCRIPTEN
 {
 public:
     CCMotionStreak();
     virtual ~CCMotionStreak();
-    /** creates and initializes a motion streak with fade in seconds, minimum segments, stroke's width, color, texture filename 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCMotionStreak* streakWithFade(float fade, float minSeg, float stroke, ccColor3B color, const char* path);
-    /** creates and initializes a motion streak with fade in seconds, minimum segments, stroke's width, color, texture 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCMotionStreak* streakWithFade(float fade, float minSeg, float stroke, ccColor3B color, CCTexture2D* texture);
 
     /** creates and initializes a motion streak with fade in seconds, minimum segments, stroke's width, color, texture filename */
     static CCMotionStreak* create(float fade, float minSeg, float stroke, ccColor3B color, const char* path);
@@ -80,8 +78,6 @@ public:
     virtual void setTexture(CCTexture2D *texture);
     virtual void setBlendFunc(ccBlendFunc blendFunc);
     virtual ccBlendFunc getBlendFunc(void);
-    virtual void setColor(const ccColor3B& color);
-    virtual ccColor3B getColor(void);
     virtual GLubyte getOpacity(void);
     virtual void setOpacity(GLubyte opacity);
     virtual void setOpacityModifyRGB(bool bValue);
@@ -104,7 +100,6 @@ private:
     CCTexture2D* m_pTexture;
     ccBlendFunc m_tBlendFunc;
     CCPoint m_tPositionR;
-    ccColor3B m_tColor;
 
     float m_fStroke;
     float m_fFadeDelta;

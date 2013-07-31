@@ -46,11 +46,6 @@ NS_CC_BEGIN
 * creation with CCTexture2D
 */
 
-CCSpriteBatchNode* CCSpriteBatchNode::batchNodeWithTexture(CCTexture2D* tex, unsigned int capacity/* = kDefaultSpriteBatchCapacity*/)
-{
-    return CCSpriteBatchNode::createWithTexture(tex, capacity);
-}
-
 CCSpriteBatchNode* CCSpriteBatchNode::createWithTexture(CCTexture2D* tex, unsigned int capacity/* = kDefaultSpriteBatchCapacity*/)
 {
     CCSpriteBatchNode *batchNode = new CCSpriteBatchNode();
@@ -63,10 +58,6 @@ CCSpriteBatchNode* CCSpriteBatchNode::createWithTexture(CCTexture2D* tex, unsign
 /*
 * creation with File Image
 */
-CCSpriteBatchNode* CCSpriteBatchNode::batchNodeWithFile(const char *fileImage, unsigned int capacity/* = kDefaultSpriteBatchCapacity*/)
-{
-    return CCSpriteBatchNode::create(fileImage, capacity);
-}
 
 CCSpriteBatchNode* CCSpriteBatchNode::create(const char *fileImage, unsigned int capacity/* = kDefaultSpriteBatchCapacity*/)
 {
@@ -120,6 +111,12 @@ bool CCSpriteBatchNode::initWithFile(const char* fileImage, unsigned int capacit
 {
     CCTexture2D *pTexture2D = CCTextureCache::sharedTextureCache()->addImage(fileImage);
     return initWithTexture(pTexture2D, capacity);
+}
+
+CCSpriteBatchNode::CCSpriteBatchNode()
+: m_pobTextureAtlas(NULL)
+, m_pobDescendants(NULL)
+{
 }
 
 CCSpriteBatchNode::~CCSpriteBatchNode()

@@ -26,6 +26,7 @@ THE SOFTWARE.
 
 #include "CCAtlasNode.h"
 #include "textures/CCTextureAtlas.h"
+#include "textures/CCTextureCache.h"
 #include "CCDirector.h"
 #include "shaders/CCGLProgram.h"
 #include "shaders/CCShaderCache.h"
@@ -49,21 +50,15 @@ CCAtlasNode::CCAtlasNode()
 , m_uItemHeight(0)
 , m_pTextureAtlas(NULL)
 , m_bIsOpacityModifyRGB(false)
-, m_cOpacity(0)
 , m_uQuadsToDraw(0)
 , m_nUniformColor(0)
+, m_bIgnoreContentScaleFactor(false)
 {
 }
 
 CCAtlasNode::~CCAtlasNode()
 {
     CC_SAFE_RELEASE(m_pTextureAtlas);
-}
-
-CCAtlasNode * CCAtlasNode::atlasWithTileFile(const char *tile, unsigned int tileWidth, unsigned int tileHeight, 
-                                             unsigned int itemsToRender)
-{
-    return CCAtlasNode::create(tile, tileWidth, tileHeight, itemsToRender);
 }
 
 CCAtlasNode * CCAtlasNode::create(const char *tile, unsigned int tileWidth, unsigned int tileHeight, 
@@ -79,24 +74,27 @@ CCAtlasNode * CCAtlasNode::create(const char *tile, unsigned int tileWidth, unsi
 	return NULL;
 }
 
-bool CCAtlasNode::initWithTileFile(const char *tile, unsigned int tileWidth, unsigned int tileHeight, 
-                                   unsigned int itemsToRender)
+bool CCAtlasNode::initWithTileFile(const char *tile, unsigned int tileWidth, unsigned int tileHeight, unsigned int itemsToRender)
 {
     CCAssert(tile != NULL, "title should not be null");
+    CCTexture2D *texture = CCTextureCache::sharedTextureCache()->addImage(tile);
+	return initWithTexture(texture, tileWidth, tileHeight, itemsToRender);
+}
+
+bool CCAtlasNode::initWithTexture(CCTexture2D* texture, unsigned int tileWidth, unsigned int tileHeight, 
+                                   unsigned int itemsToRender)
+{
     m_uItemWidth  = tileWidth;
     m_uItemHeight = tileHeight;
 
-    m_cOpacity = 255;
-    m_tColor = m_tColorUnmodified = ccWHITE;
+    m_tColorUnmodified = ccWHITE;
     m_bIsOpacityModifyRGB = true;
 
     m_tBlendFunc.src = CC_BLEND_SRC;
     m_tBlendFunc.dst = CC_BLEND_DST;
 
-    CCTextureAtlas* pNewAtlas= new CCTextureAtlas();
-    pNewAtlas->initWithFile(tile, itemsToRender);
-    setTextureAtlas(pNewAtlas);
-    pNewAtlas->release();
+    m_pTextureAtlas = new CCTextureAtlas();
+    m_pTextureAtlas->initWithTexture(texture, itemsToRender);
 
     if (! m_pTextureAtlas)
     {
@@ -124,6 +122,12 @@ bool CCAtlasNode::initWithTileFile(const char *tile, unsigned int tileWidth, uns
 void CCAtlasNode::calculateMaxItems()
 {
     CCSize s = m_pTextureAtlas->getTexture()->getContentSize();
+    
+    if (m_bIgnoreContentScaleFactor)
+    {
+        s = m_pTextureAtlas->getTexture()->getContentSizeInPixels();
+    }
+    
     m_uItemsPerColumn = (int)(s.height / m_uItemHeight);
     m_uItemsPerRow = (int)(s.width / m_uItemWidth);
 }
@@ -140,7 +144,7 @@ void CCAtlasNode::draw(void)
 
     ccGLBlendFunc( m_tBlendFunc.src, m_tBlendFunc.dst );
 
-    GLfloat colors[4] = {m_tColor.r / 255.0f, m_tColor.g / 255.0f, m_tColor.b / 255.0f, m_cOpacity / 255.0f};
+    GLfloat colors[4] = {_displayedColor.r / 255.0f, _displayedColor.g / 255.0f, _displayedColor.b / 255.0f, _displayedOpacity / 255.0f};
     getShaderProgram()->setUniformLocationWith4fv(m_nUniformColor, colors, 1);
 
     m_pTextureAtlas->drawNumberOfQuads(m_uQuadsToDraw, 0);
@@ -148,35 +152,32 @@ void CCAtlasNode::draw(void)
 
 // CCAtlasNode - RGBA protocol
 
-ccColor3B CCAtlasNode:: getColor()
+const ccColor3B& CCAtlasNode::getColor()
 {
     if(m_bIsOpacityModifyRGB)
     {
         return m_tColorUnmodified;
     }
-    return m_tColor;
+    return CCNodeRGBA::getColor();
 }
 
 void CCAtlasNode::setColor(const ccColor3B& color3)
 {
-    m_tColor = m_tColorUnmodified = color3;
+    ccColor3B tmp = color3;
+    m_tColorUnmodified = color3;
 
     if( m_bIsOpacityModifyRGB )
     {
-        m_tColor.r = color3.r * m_cOpacity/255;
-        m_tColor.g = color3.g * m_cOpacity/255;
-        m_tColor.b = color3.b * m_cOpacity/255;
-    }    
-}
-
-GLubyte CCAtlasNode::getOpacity()
-{
-    return m_cOpacity;
+        tmp.r = tmp.r * _displayedOpacity/255;
+        tmp.g = tmp.g * _displayedOpacity/255;
+        tmp.b = tmp.b * _displayedOpacity/255;
+    }
+    CCNodeRGBA::setColor(tmp);
 }
 
 void CCAtlasNode::setOpacity(GLubyte opacity)
 {
-    m_cOpacity = opacity;
+    CCNodeRGBA::setOpacity(opacity);
 
     // special opacity for premultiplied textures
     if( m_bIsOpacityModifyRGB )
@@ -185,9 +186,9 @@ void CCAtlasNode::setOpacity(GLubyte opacity)
 
 void CCAtlasNode::setOpacityModifyRGB(bool bValue)
 {
-    ccColor3B oldColor    = this->m_tColor;
+    ccColor3B oldColor = this->getColor();
     m_bIsOpacityModifyRGB = bValue;
-    this->m_tColor        = oldColor;
+    this->setColor(oldColor);
 }
 
 bool CCAtlasNode::isOpacityModifyRGB()
@@ -198,6 +199,11 @@ bool CCAtlasNode::isOpacityModifyRGB()
 void CCAtlasNode::updateOpacityModifyRGB()
 {
     m_bIsOpacityModifyRGB = m_pTextureAtlas->getTexture()->hasPremultipliedAlpha();
+}
+
+void CCAtlasNode::setIgnoreContentScaleFactor(bool bIgnoreContentScaleFactor)
+{
+    m_bIgnoreContentScaleFactor = bIgnoreContentScaleFactor;
 }
 
 // CCAtlasNode - CocosNodeTexture protocol

@@ -26,7 +26,7 @@
 #ifndef __CCSCROLLVIEW_H__
 #define __CCSCROLLVIEW_H__
 
-#include "layers_scenes_transitions_nodes/CCLayer.h"
+#include "cocos2d.h"
 #include "ExtensionMacros.h"
 
 NS_CC_EXT_BEGIN
@@ -66,14 +66,6 @@ public:
 
     bool init();
     virtual void registerWithTouchDispatcher();
-    /**
-     * Returns an autoreleased scroll view object.
-     * @deprecated: This interface will be deprecated sooner or later.
-     * @param size view size
-     * @param container parent object
-     * @return autoreleased scroll view object
-     */
-    CC_DEPRECATED_ATTRIBUTE static CCScrollView* viewWithViewSize(CCSize size, CCNode* container = NULL);
 
     /**
      * Returns an autoreleased scroll view object.
@@ -83,15 +75,6 @@ public:
      * @return autoreleased scroll view object
      */
     static CCScrollView* create(CCSize size, CCNode* container = NULL);
-
-    /**
-     * Returns an autoreleased scroll view object.
-     * @deprecated: This interface will be deprecated sooner or later.
-     * @param size view size
-     * @param container parent object
-     * @return autoreleased scroll view object
-     */
-    CC_DEPRECATED_ATTRIBUTE static CCScrollView* node();
 
     /**
      * Returns an autoreleased scroll view object.
@@ -204,7 +187,7 @@ public:
     virtual void ccTouchCancelled(CCTouch *pTouch, CCEvent *pEvent);
 
     virtual void setContentSize(const CCSize & size);
-    virtual CCSize getContentSize();
+    virtual const CCSize& getContentSize() const;
 
 	void updateInset();
     /**
@@ -219,13 +202,6 @@ public:
     virtual void addChild(CCNode * child);
     void setTouchEnabled(bool e);
 private:
-    /**
-     * Init this object with a given size to clip its content.
-     *
-     * @param size view size
-     * @return initialized scroll view object
-     */
-    bool initWithViewSize(CCSize size);
     /**
      * Relocates the container at the proper offset, in bounds of max/min offsets.
      *
@@ -262,6 +238,8 @@ private:
     void handleZoom();
 
 protected:
+    CCRect getViewRect();
+    
     /**
      * current zoom scale
      */
@@ -339,6 +317,11 @@ protected:
      * max and min scale
      */
     float m_fMinScale, m_fMaxScale;
+    /**
+     * scissor rect for parent, just for restoring GL_SCISSOR_BOX
+     */
+    CCRect m_tParentScissorRect;
+    bool m_bScissorRestored;
 };
 
 // end of GUI group

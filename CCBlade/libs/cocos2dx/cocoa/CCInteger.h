@@ -17,18 +17,16 @@ public:
         : m_nValue(v) {}
     int getValue() const {return m_nValue;}
 
-    // @deprecated: This interface will be deprecated sooner or later.
-    CC_DEPRECATED_ATTRIBUTE static CCInteger* integerWithInt(int v)
-    {
-        return CCInteger::create(v);
-    }
-
     static CCInteger* create(int v)
     {
         CCInteger* pRet = new CCInteger(v);
         pRet->autorelease();
         return pRet;
     }
+
+    /* override functions */
+    virtual void acceptVisitor(CCDataVisitor &visitor) { visitor.visit(this); }
+
 private:
     int m_nValue;
 };

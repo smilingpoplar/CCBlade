@@ -26,6 +26,9 @@ THE SOFTWARE.
 #define __MISC_NODE_CCPROGRESS_TIMER_H__
 
 #include "sprite_nodes/CCSprite.h"
+#ifdef EMSCRIPTEN
+#include "base_nodes/CCGLBufferedNode.h"
+#endif // EMSCRIPTEN
 
 NS_CC_BEGIN
 
@@ -50,7 +53,10 @@ typedef enum {
  The progress can be Radial, Horizontal or vertical.
  @since v0.99.1
  */
-class CC_DLL CCProgressTimer : public CCNode, public CCRGBAProtocol
+class CC_DLL CCProgressTimer : public CCNodeRGBA
+#ifdef EMSCRIPTEN
+, public CCGLBufferedNode
+#endif // EMSCRIPTEN
 {
 public:
     CCProgressTimer();
@@ -76,10 +82,6 @@ public:
     virtual void draw(void);
     void setAnchorPoint(CCPoint anchorPoint);
 
-    virtual void setColor(const ccColor3B& color);
-    virtual ccColor3B getColor(void);
-    virtual GLubyte getOpacity(void);
-    virtual void setOpacity(GLubyte opacity);
     virtual void setOpacityModifyRGB(bool bValue);
     virtual bool isOpacityModifyRGB(void);
     
@@ -87,10 +89,6 @@ public:
     inline void setReverseDirection(bool value) { m_bReverseDirection = value; };
 
 public:
-    /** Creates a progress timer with the sprite as the shape the timer goes through 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCProgressTimer* progressWithSprite(CCSprite* sp);
     /** Creates a progress timer with the sprite as the shape the timer goes through */
     static CCProgressTimer* create(CCSprite* sp);
 protected:

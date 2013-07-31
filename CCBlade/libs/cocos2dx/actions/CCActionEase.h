@@ -55,18 +55,16 @@ public:
     virtual void stop(void);
     virtual void update(float time);
     virtual CCActionInterval* reverse(void);
+    virtual CCActionInterval* getInnerAction();
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCActionEase* actionWithAction(CCActionInterval *pAction);
 
     /** creates the action */
     static CCActionEase* create(CCActionInterval *pAction);
 
 protected:
-    CCActionInterval *m_pOther;
+    /** The inner action */
+    CCActionInterval *m_pInner;
 };
 
 /** 
@@ -90,10 +88,6 @@ public:
     virtual CCActionInterval* reverse(void);
 
 public:
-    /** Creates the action with the inner action and the rate parameter 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseRateAction* actionWithAction(CCActionInterval* pAction, float fRate);
 
     /** Creates the action with the inner action and the rate parameter */
     static CCEaseRateAction* create(CCActionInterval* pAction, float fRate);
@@ -113,10 +107,6 @@ public:
     virtual CCActionInterval* reverse(void);
     virtual CCObject* copyWithZone(CCZone* pZone);
 public:
-    /** Creates the action with the inner action and the rate parameter 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseIn* actionWithAction(CCActionInterval* pAction, float fRate);
 
     /** Creates the action with the inner action and the rate parameter */
     static CCEaseIn* create(CCActionInterval* pAction, float fRate);
@@ -134,10 +124,6 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** Creates the action with the inner action and the rate parameter
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseOut* actionWithAction(CCActionInterval* pAction, float fRate);
 
     /** Creates the action with the inner action and the rate parameter */
     static CCEaseOut* create(CCActionInterval* pAction, float fRate);
@@ -155,10 +141,6 @@ public:
     virtual CCActionInterval* reverse(void);
 
 public:
-    /** Creates the action with the inner action and the rate parameter 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseInOut* actionWithAction(CCActionInterval* pAction, float fRate);
 
     /** Creates the action with the inner action and the rate parameter */
     static CCEaseInOut* create(CCActionInterval* pAction, float fRate);
@@ -176,10 +158,6 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseExponentialIn* actionWithAction(CCActionInterval* pAction);
     /** creates the action */
     static CCEaseExponentialIn* create(CCActionInterval* pAction);
 };
@@ -196,10 +174,6 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseExponentialOut* actionWithAction(CCActionInterval* pAction);
     /** creates the action */
     static CCEaseExponentialOut* create(CCActionInterval* pAction);
 };
@@ -216,10 +190,6 @@ public:
     virtual CCActionInterval* reverse();
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseExponentialInOut* actionWithAction(CCActionInterval* pAction);
 
     /** creates the action */
     static CCEaseExponentialInOut* create(CCActionInterval* pAction);
@@ -237,10 +207,6 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseSineIn* actionWithAction(CCActionInterval* pAction);
     /** creates the action */
     static CCEaseSineIn* create(CCActionInterval* pAction);
 };
@@ -257,10 +223,7 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseSineOut* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseSineOut* create(CCActionInterval* pAction);
 };
@@ -277,10 +240,7 @@ public:
     virtual CCActionInterval* reverse();
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseSineInOut* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseSineInOut* create(CCActionInterval* pAction);
 };
@@ -305,10 +265,7 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** Creates the action with the inner action and the period in radians (default is 0.3) 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseElastic* actionWithAction(CCActionInterval *pAction, float fPeriod = 0.3f);
+
     /** Creates the action with the inner action and the period in radians (default is 0.3) */
     static CCEaseElastic* create(CCActionInterval *pAction, float fPeriod);
     static CCEaseElastic* create(CCActionInterval *pAction);
@@ -330,10 +287,7 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** Creates the action with the inner action and the period in radians (default is 0.3) 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseElasticIn* actionWithAction(CCActionInterval *pAction, float fPeriod = 0.3f);
+
     /** Creates the action with the inner action and the period in radians (default is 0.3) */
     static CCEaseElasticIn* create(CCActionInterval *pAction, float fPeriod);
     static CCEaseElasticIn* create(CCActionInterval *pAction);
@@ -353,10 +307,6 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** Creates the action with the inner action and the period in radians (default is 0.3) 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseElasticOut* actionWithAction(CCActionInterval *pAction, float fPeriod = 0.3f);
 
     /** Creates the action with the inner action and the period in radians (default is 0.3) */
     static CCEaseElasticOut* create(CCActionInterval *pAction, float fPeriod);
@@ -377,10 +327,6 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** Creates the action with the inner action and the period in radians (default is 0.3) 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseElasticInOut* actionWithAction(CCActionInterval *pAction, float fPeriod = 0.3f);
 
     /** Creates the action with the inner action and the period in radians (default is 0.3) */
     static CCEaseElasticInOut* create(CCActionInterval *pAction, float fPeriod);
@@ -400,10 +346,7 @@ public:
     virtual CCActionInterval* reverse();
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseBounce* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseBounce* create(CCActionInterval* pAction);
 };
@@ -422,10 +365,7 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** creates the action
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseBounceIn* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseBounceIn* create(CCActionInterval* pAction);
 };
@@ -444,10 +384,7 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseBounceOut* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseBounceOut* create(CCActionInterval* pAction);
 };
@@ -466,10 +403,7 @@ public:
     virtual CCActionInterval* reverse();
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseBounceInOut* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseBounceInOut* create(CCActionInterval* pAction);
 };
@@ -488,10 +422,7 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseBackIn* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseBackIn* create(CCActionInterval* pAction);
 };
@@ -510,10 +441,7 @@ public:
     virtual CCObject* copyWithZone(CCZone* pZone);
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseBackOut* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseBackOut* create(CCActionInterval* pAction);
 };
@@ -532,10 +460,7 @@ public:
     virtual CCActionInterval* reverse();
 
 public:
-    /** creates the action 
-    @deprecated: This interface will be deprecated sooner or later.
-    */
-    CC_DEPRECATED_ATTRIBUTE static CCEaseBackInOut* actionWithAction(CCActionInterval* pAction);
+
     /** creates the action */
     static CCEaseBackInOut* create(CCActionInterval* pAction);
 };

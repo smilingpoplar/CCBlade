@@ -40,7 +40,7 @@ static const int kMaxLogLen = 16*1024;
 /**
 @brief Output Debug message.
 */
-void CC_DLL CCLog(const char * pszFormat, ...);
+void CC_DLL CCLog(const char * pszFormat, ...) CC_FORMAT_PRINTF(1, 2);
 
 /**
  * lua can not deal with ...
@@ -64,7 +64,11 @@ typedef enum LanguageType
     kLanguageGerman,
     kLanguageSpanish,
     kLanguageRussian,
-    kLanguageKorean
+    kLanguageKorean,
+    kLanguageJapanese,
+    kLanguageHungarian,
+    kLanguagePortuguese,
+    kLanguageArabic
 } ccLanguageType;
 
 // end of platform group

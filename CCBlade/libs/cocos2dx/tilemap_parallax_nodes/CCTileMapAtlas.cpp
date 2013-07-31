@@ -31,15 +31,11 @@ THE SOFTWARE.
 #include "cocoa/CCDictionary.h"
 #include "cocoa/CCInteger.h"
 #include "CCDirector.h"
+#include "support/CCPointExtension.h"
 
 NS_CC_BEGIN
 
 // implementation CCTileMapAtlas
-
-CCTileMapAtlas * CCTileMapAtlas::tileMapAtlasWithTileFile(const char *tile, const char *mapFile, int tileWidth, int tileHeight)
-{
-    return CCTileMapAtlas::create(tile, mapFile, tileWidth, tileHeight);
-}
 
 CCTileMapAtlas * CCTileMapAtlas::create(const char *tile, const char *mapFile, int tileWidth, int tileHeight)
 {
@@ -60,7 +56,6 @@ bool CCTileMapAtlas::initWithTileFile(const char *tile, const char *mapFile, int
 
     if( CCAtlasNode::initWithTileFile(tile, tileWidth, tileHeight, m_nItemsToRender) )
     {
-        m_tColor = ccWHITE;
         m_pPosToAtlasIndex = new CCDictionary();
         this->updateAtlasValues();
         this->setContentSize(CCSizeMake((float)(m_pTGAInfo->width*m_uItemWidth),
@@ -120,14 +115,14 @@ void CCTileMapAtlas::loadTGAfile(const char *file)
 {
     CCAssert( file != NULL, "file must be non-nil");
 
-    const char* pPath = CCFileUtils::sharedFileUtils()->fullPathFromRelativePath(file);
+    std::string fullPath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file);
 
     //    //Find the path of the file
     //    NSBundle *mainBndl = [CCDirector sharedDirector].loadingBundle;
     //    CCString *resourcePath = [mainBndl resourcePath];
     //    CCString * path = [resourcePath stringByAppendingPathComponent:file];
 
-    m_pTGAInfo = tgaLoad( pPath );
+    m_pTGAInfo = tgaLoad( fullPath.c_str() );
 #if 1
     if( m_pTGAInfo->status != TGA_OK ) 
     {
@@ -137,23 +132,23 @@ void CCTileMapAtlas::loadTGAfile(const char *file)
 }
 
 // CCTileMapAtlas - Atlas generation / updates
-void CCTileMapAtlas::setTile(const ccColor3B& tile, const ccGridSize& position)
+void CCTileMapAtlas::setTile(const ccColor3B& tile, const CCPoint& position)
 {
-    CCAssert( m_pTGAInfo != NULL, "tgaInfo must not be nil");
-    CCAssert( m_pPosToAtlasIndex != NULL, "posToAtlasIndex must not be nil");
-    CCAssert( position.x < m_pTGAInfo->width, "Invalid position.x");
-    CCAssert( position.y < m_pTGAInfo->height, "Invalid position.x");
-    CCAssert( tile.r != 0, "R component must be non 0");
+    CCAssert(m_pTGAInfo != NULL, "tgaInfo must not be nil");
+    CCAssert(m_pPosToAtlasIndex != NULL, "posToAtlasIndex must not be nil");
+    CCAssert(position.x < m_pTGAInfo->width, "Invalid position.x");
+    CCAssert(position.y < m_pTGAInfo->height, "Invalid position.x");
+    CCAssert(tile.r != 0, "R component must be non 0");
 
     ccColor3B *ptr = (ccColor3B*)m_pTGAInfo->imageData;
-    ccColor3B value = ptr[position.x + position.y * m_pTGAInfo->width];
+    ccColor3B value = ptr[(unsigned int)(position.x + position.y * m_pTGAInfo->width)];
     if( value.r == 0 )
     {
         CCLOG("cocos2d: Value.r must be non 0.");
     } 
     else
     {
-        ptr[position.x + position.y * m_pTGAInfo->width] = tile;
+        ptr[(unsigned int)(position.x + position.y * m_pTGAInfo->width)] = tile;
 
         // XXX: this method consumes a lot of memory
         // XXX: a tree of something like that shall be implemented
@@ -164,21 +159,23 @@ void CCTileMapAtlas::setTile(const ccColor3B& tile, const ccGridSize& position)
     }    
 }
 
-ccColor3B CCTileMapAtlas::tileAt(const ccGridSize& position)
+ccColor3B CCTileMapAtlas::tileAt(const CCPoint& position)
 {
     CCAssert( m_pTGAInfo != NULL, "tgaInfo must not be nil");
     CCAssert( position.x < m_pTGAInfo->width, "Invalid position.x");
     CCAssert( position.y < m_pTGAInfo->height, "Invalid position.y");
 
     ccColor3B *ptr = (ccColor3B*)m_pTGAInfo->imageData;
-    ccColor3B value = ptr[position.x + position.y * m_pTGAInfo->width];
+    ccColor3B value = ptr[(unsigned int)(position.x + position.y * m_pTGAInfo->width)];
 
     return value;    
 }
 
-void CCTileMapAtlas::updateAtlasValueAt(const ccGridSize& pos, const ccColor3B& value, unsigned int index)
+void CCTileMapAtlas::updateAtlasValueAt(const CCPoint& pos, const ccColor3B& value, unsigned int index)
 {
-    ccV3F_C4B_T2F_Quad quad;
+    CCAssert( index >= 0 && index < m_pTextureAtlas->getCapacity(), "updateAtlasValueAt: Invalid index");
+
+    ccV3F_C4B_T2F_Quad* quad = &((m_pTextureAtlas->getQuads())[index]);
 
     int x = pos.x;
     int y = pos.y;
@@ -203,35 +200,39 @@ void CCTileMapAtlas::updateAtlasValueAt(const ccGridSize& pos, const ccColor3B& 
     float bottom      = top + itemHeightInPixels / textureHigh;
 #endif
 
-    quad.tl.texCoords.u = left;
-    quad.tl.texCoords.v = top;
-    quad.tr.texCoords.u = right;
-    quad.tr.texCoords.v = top;
-    quad.bl.texCoords.u = left;
-    quad.bl.texCoords.v = bottom;
-    quad.br.texCoords.u = right;
-    quad.br.texCoords.v = bottom;
+    quad->tl.texCoords.u = left;
+    quad->tl.texCoords.v = top;
+    quad->tr.texCoords.u = right;
+    quad->tr.texCoords.v = top;
+    quad->bl.texCoords.u = left;
+    quad->bl.texCoords.v = bottom;
+    quad->br.texCoords.u = right;
+    quad->br.texCoords.v = bottom;
 
-    quad.bl.vertices.x = (float) (x * m_uItemWidth);
-    quad.bl.vertices.y = (float) (y * m_uItemHeight);
-    quad.bl.vertices.z = 0.0f;
-    quad.br.vertices.x = (float)(x * m_uItemWidth + m_uItemWidth);
-    quad.br.vertices.y = (float)(y * m_uItemHeight);
-    quad.br.vertices.z = 0.0f;
-    quad.tl.vertices.x = (float)(x * m_uItemWidth);
-    quad.tl.vertices.y = (float)(y * m_uItemHeight + m_uItemHeight);
-    quad.tl.vertices.z = 0.0f;
-    quad.tr.vertices.x = (float)(x * m_uItemWidth + m_uItemWidth);
-    quad.tr.vertices.y = (float)(y * m_uItemHeight + m_uItemHeight);
-    quad.tr.vertices.z = 0.0f;
+    quad->bl.vertices.x = (float) (x * m_uItemWidth);
+    quad->bl.vertices.y = (float) (y * m_uItemHeight);
+    quad->bl.vertices.z = 0.0f;
+    quad->br.vertices.x = (float)(x * m_uItemWidth + m_uItemWidth);
+    quad->br.vertices.y = (float)(y * m_uItemHeight);
+    quad->br.vertices.z = 0.0f;
+    quad->tl.vertices.x = (float)(x * m_uItemWidth);
+    quad->tl.vertices.y = (float)(y * m_uItemHeight + m_uItemHeight);
+    quad->tl.vertices.z = 0.0f;
+    quad->tr.vertices.x = (float)(x * m_uItemWidth + m_uItemWidth);
+    quad->tr.vertices.y = (float)(y * m_uItemHeight + m_uItemHeight);
+    quad->tr.vertices.z = 0.0f;
 
-    ccColor4B color = { m_tColor.r, m_tColor.g, m_tColor.b, m_cOpacity };
-    quad.tr.colors = color;
-    quad.tl.colors = color;
-    quad.br.colors = color;
-    quad.bl.colors = color;
+    ccColor4B color = { _displayedColor.r, _displayedColor.g, _displayedColor.b, _displayedOpacity };
+    quad->tr.colors = color;
+    quad->tl.colors = color;
+    quad->br.colors = color;
+    quad->bl.colors = color;
 
-    m_pTextureAtlas->updateQuad(&quad, index);
+    m_pTextureAtlas->setDirty(true);
+    unsigned int totalQuads = m_pTextureAtlas->getTotalQuads();
+    if (index + 1 > totalQuads) {
+        m_pTextureAtlas->increaseTotalQuadsWith(index + 1 - totalQuads);
+    }
 }
 
 void CCTileMapAtlas::updateAtlasValues()
@@ -251,7 +252,7 @@ void CCTileMapAtlas::updateAtlasValues()
 
                 if( value.r != 0 )
                 {
-                    this->updateAtlasValueAt(ccg(x,y), value, total);
+                    this->updateAtlasValueAt(ccp(x,y), value, total);
 
                     CCString *key = CCString::createWithFormat("%d,%d", x,y);
                     CCInteger *num = CCInteger::create(total);

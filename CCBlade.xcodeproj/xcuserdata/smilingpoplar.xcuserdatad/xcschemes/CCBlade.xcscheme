@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0450"
+   LastUpgradeVersion = "0460"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "876227B816A5AE22001BB044"
+               BlueprintIdentifier = "871C228617A8B6E6004EE3CB"
                BuildableName = "CCBlade.app"
                BlueprintName = "CCBlade"
                ReferencedContainer = "container:CCBlade.xcodeproj">
@@ -32,7 +32,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "876227B816A5AE22001BB044"
+            BlueprintIdentifier = "871C228617A8B6E6004EE3CB"
             BuildableName = "CCBlade.app"
             BlueprintName = "CCBlade"
             ReferencedContainer = "container:CCBlade.xcodeproj">
@@ -51,7 +51,7 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "876227B816A5AE22001BB044"
+            BlueprintIdentifier = "871C228617A8B6E6004EE3CB"
             BuildableName = "CCBlade.app"
             BlueprintName = "CCBlade"
             ReferencedContainer = "container:CCBlade.xcodeproj">
@@ -69,7 +69,7 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "876227B816A5AE22001BB044"
+            BlueprintIdentifier = "871C228617A8B6E6004EE3CB"
             BuildableName = "CCBlade.app"
             BlueprintName = "CCBlade"
             ReferencedContainer = "container:CCBlade.xcodeproj">

@@ -122,8 +122,31 @@ public:
 
  */
     void updateUniforms();
+    
+    /** calls retrieves the named uniform location for this shader program. */
+    GLint getUniformLocationForName(const char* name);
+    
     /** calls glUniform1i only if the values are different than the previous call for this same shader program. */
     void setUniformLocationWith1i(GLint location, GLint i1);
+    
+    /** calls glUniform2i only if the values are different than the previous call for this same shader program. */
+    void setUniformLocationWith2i(GLint location, GLint i1, GLint i2);
+    
+    /** calls glUniform3i only if the values are different than the previous call for this same shader program. */
+    void setUniformLocationWith3i(GLint location, GLint i1, GLint i2, GLint i3);
+    
+    /** calls glUniform4i only if the values are different than the previous call for this same shader program. */
+    void setUniformLocationWith4i(GLint location, GLint i1, GLint i2, GLint i3, GLint i4);
+    
+    /** calls glUniform2iv only if the values are different than the previous call for this same shader program. */
+    void setUniformLocationWith2iv(GLint location, GLint* ints, unsigned int numberOfArrays);
+    
+    /** calls glUniform3iv only if the values are different than the previous call for this same shader program. */
+    void setUniformLocationWith3iv(GLint location, GLint* ints, unsigned int numberOfArrays);
+    
+    /** calls glUniform4iv only if the values are different than the previous call for this same shader program. */
+    
+    void setUniformLocationWith4iv(GLint location, GLint* ints, unsigned int numberOfArrays);
 
     /** calls glUniform1f only if the values are different than the previous call for this same shader program. */
     void setUniformLocationWith1f(GLint location, GLfloat f1);
@@ -151,9 +174,6 @@ public:
     
     /** will update the builtin uniforms if they are different than the previous call for this same shader program. */
     void setUniformsForBuiltins();
-
-    /** Deprecated alias for setUniformsForBuiltins */
-    CC_DEPRECATED_ATTRIBUTE void setUniformForModelViewProjectionMatrix();
 
     /** returns the vertexShader error log */
     const char* vertexShaderLog();

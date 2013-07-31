@@ -264,7 +264,9 @@ void CCBlade::draw()
     
     CC_NODE_DRAW_SETUP();
     ccGLEnableVertexAttribs(kCCVertexAttribFlag_Position | kCCVertexAttribFlag_TexCoords);
-    GLfloat color[4] = { getColor().r/255.0f, getColor().g/255.0f, getColor().b/255.0f, getOpacity()/255.0f };
+    
+    const ccColor3B &realColor = getColor();
+    GLfloat color[4] = { realColor.r/255.0f, realColor.g/255.0f, realColor.b/255.0f, getOpacity()/255.0f };
     getShaderProgram()->setUniformLocationWith4fv(_uniformColor, color, 1);
     ccGLBindTexture2D(_texture->getName());
     

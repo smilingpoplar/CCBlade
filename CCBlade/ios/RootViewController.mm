@@ -2,7 +2,7 @@
 //  CCBladeAppController.h
 //  CCBlade
 //
-//  Created by smilingpoplar on 13-1-15.
+//  Created by smilingpoplar on 13-7-31.
 //  Copyright __MyCompanyName__ 2013年. All rights reserved.
 //
 

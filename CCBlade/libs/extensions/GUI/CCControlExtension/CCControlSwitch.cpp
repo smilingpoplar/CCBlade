@@ -170,7 +170,12 @@ void CCControlSwitchSprite::draw()
     glUniform1i(m_uMaskLocation, 1);
 
 #define kQuadSize sizeof(m_sQuad.bl)
+#ifdef EMSCRIPTEN
+    long offset = 0;
+    setGLBufferData(&m_sQuad, 4 * kQuadSize, 0);
+#else
     long offset = (long)&m_sQuad;
+#endif // EMSCRIPTEN
 
     // vertex
     int diff = offsetof( ccV3F_C4B_T2F, vertices);
@@ -279,11 +284,6 @@ bool CCControlSwitch::initWithMaskSprite(CCSprite *maskSprite, CCSprite * onSpri
     return initWithMaskSprite(maskSprite, onSprite, offSprite, thumbSprite, NULL, NULL);
 }
 
-CCControlSwitch* CCControlSwitch::switchWithMaskSprite(CCSprite *maskSprite, CCSprite * onSprite, CCSprite * offSprite, CCSprite * thumbSprite)
-{
-    return CCControlSwitch::create(maskSprite, onSprite, offSprite, thumbSprite);
-}
-
 CCControlSwitch* CCControlSwitch::create(CCSprite *maskSprite, CCSprite * onSprite, CCSprite * offSprite, CCSprite * thumbSprite)
 {
     CCControlSwitch* pRet = new CCControlSwitch();
@@ -328,11 +328,6 @@ bool CCControlSwitch::initWithMaskSprite(CCSprite *maskSprite, CCSprite * onSpri
     return false;
 }
 
-CCControlSwitch* CCControlSwitch::switchWithMaskSprite(CCSprite *maskSprite, CCSprite * onSprite, CCSprite * offSprite, CCSprite * thumbSprite, CCLabelTTF* onLabel, CCLabelTTF* offLabel)
-{
-    return CCControlSwitch::create(maskSprite, onSprite, offSprite, thumbSprite, onLabel, offLabel);
-}
-
 CCControlSwitch* CCControlSwitch::create(CCSprite *maskSprite, CCSprite * onSprite, CCSprite * offSprite, CCSprite * thumbSprite, CCLabelTTF* onLabel, CCLabelTTF* offLabel)
 {
     CCControlSwitch* pRet = new CCControlSwitch();
@@ -355,17 +350,22 @@ void CCControlSwitch::setOn(bool isOn)
 void CCControlSwitch::setOn(bool isOn, bool animated)
 {
     m_bOn     = isOn;
-
-    m_pSwitchSprite->runAction
-    (
-        CCActionTween::create
-            (
-                0.2f, 
-                "sliderXPosition",
-                m_pSwitchSprite->getSliderXPosition(),
-                (m_bOn) ? m_pSwitchSprite->getOnPosition() : m_pSwitchSprite->getOffPosition()
-            )
-    );
+    
+    if (animated) {
+        m_pSwitchSprite->runAction
+        (
+            CCActionTween::create
+                (
+                    0.2f,
+                    "sliderXPosition",
+                    m_pSwitchSprite->getSliderXPosition(),
+                    (m_bOn) ? m_pSwitchSprite->getOnPosition() : m_pSwitchSprite->getOffPosition()
+                )
+         );
+    }
+    else {
+        m_pSwitchSprite->setSliderXPosition((m_bOn) ? m_pSwitchSprite->getOnPosition() : m_pSwitchSprite->getOffPosition());
+    }
     
     sendActionsForControlEvents(CCControlEventValueChanged);
 }

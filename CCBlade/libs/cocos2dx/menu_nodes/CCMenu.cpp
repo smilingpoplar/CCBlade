@@ -59,26 +59,9 @@ enum
 //CCMenu
 //
 
-CCMenu* CCMenu::node()
-{
-    return CCMenu::create();
-}
-
 CCMenu* CCMenu::create()
 {
     return CCMenu::create(NULL, NULL);
-}
-
-CCMenu * CCMenu::menuWithItems(CCMenuItem* item, ...)
-{
-    va_list args;
-    va_start(args,item);
-    
-    CCMenu *pRet = CCMenu::createWithItems(item, args);
-    
-    va_end(args);
-    
-    return pRet;
 }
 
 CCMenu * CCMenu::create(CCMenuItem* item, ...)
@@ -89,13 +72,8 @@ CCMenu * CCMenu::create(CCMenuItem* item, ...)
     CCMenu *pRet = CCMenu::createWithItems(item, args);
     
     va_end(args);
-
+    
     return pRet;
-}
-
-CCMenu* CCMenu::menuWithArray(CCArray* pArrayOfItems)
-{
-    return CCMenu::createWithArray(pArrayOfItems);
 }
 
 CCMenu* CCMenu::createWithArray(CCArray* pArrayOfItems)
@@ -111,11 +89,6 @@ CCMenu* CCMenu::createWithArray(CCArray* pArrayOfItems)
     }
     
     return pRet;
-}
-
-CCMenu* CCMenu::menuWithItem(CCMenuItem* item)
-{
-    return CCMenu::createWithItem(item);
 }
 
 CCMenu* CCMenu::createWithItems(CCMenuItem* item, va_list args)
@@ -178,6 +151,11 @@ bool CCMenu::initWithArray(CCArray* pArrayOfItems)
         //    [self alignItemsVertically];
         m_pSelectedItem = NULL;
         m_eState = kCCMenuStateWaiting;
+        
+        // enable cascade color and opacity on menus
+        setCascadeColorEnabled(true);
+        setCascadeOpacityEnabled(true);
+        
         return true;
     }
     return false;
@@ -206,12 +184,29 @@ void CCMenu::onExit()
 {
     if (m_eState == kCCMenuStateTrackingTouch)
     {
-        m_pSelectedItem->unselected();
+        if (m_pSelectedItem)
+        {
+            m_pSelectedItem->unselected();
+            m_pSelectedItem = NULL;
+        }
+        
         m_eState = kCCMenuStateWaiting;
-        m_pSelectedItem = NULL;
     }
 
     CCLayer::onExit();
+}
+
+void CCMenu::removeChild(CCNode* child, bool cleanup)
+{
+    CCMenuItem *pMenuItem = dynamic_cast<CCMenuItem*>(child);
+    CCAssert(pMenuItem != NULL, "Menu only supports MenuItem objects as children");
+    
+    if (m_pSelectedItem == pMenuItem)
+    {
+        m_pSelectedItem = NULL;
+    }
+    
+    CCNode::removeChild(child, cleanup);
 }
 
 //Menu - Events
@@ -225,7 +220,7 @@ void CCMenu::setHandlerPriority(int newPriority)
 void CCMenu::registerWithTouchDispatcher()
 {
     CCDirector* pDirector = CCDirector::sharedDirector();
-    pDirector->getTouchDispatcher()->addTargetedDelegate(this, kCCMenuHandlerPriority, true);
+    pDirector->getTouchDispatcher()->addTargetedDelegate(this, this->getTouchPriority(), true);
 }
 
 bool CCMenu::ccTouchBegan(CCTouch* touch, CCEvent* event)
@@ -603,63 +598,6 @@ void CCMenu::alignItemsInRowsWithArray(CCArray* columnArray)
             }
         }
     }
-}
-
-// Opacity Protocol
-
-/** Override synthesized setOpacity to recurse items */
-void CCMenu::setOpacity(GLubyte var)
-{
-    m_cOpacity = var;
-
-    if (m_pChildren && m_pChildren->count() > 0)
-    {
-        CCObject* pObject = NULL;
-        CCARRAY_FOREACH(m_pChildren, pObject)
-        {
-            CCNode* pChild = dynamic_cast<CCNode*>(pObject);
-            if (pChild)
-            {
-                CCRGBAProtocol *pRGBAProtocol = dynamic_cast<CCRGBAProtocol*>(pChild);
-                if (pRGBAProtocol)
-                {
-                    pRGBAProtocol->setOpacity(m_cOpacity);
-                }
-            }
-        }
-    }
-}
-
-GLubyte CCMenu::getOpacity(void)
-{
-    return m_cOpacity;
-}
-
-void CCMenu::setColor(const ccColor3B& var)
-{
-    m_tColor = var;
-
-    if (m_pChildren && m_pChildren->count() > 0)
-    {
-        CCObject* pObject = NULL;
-        CCARRAY_FOREACH(m_pChildren, pObject)
-        {
-            CCNode* pChild = dynamic_cast<CCNode*>(pObject);
-            if (pChild)
-            {
-                CCRGBAProtocol *pRGBAProtocol = dynamic_cast<CCRGBAProtocol*>(pChild);
-                if (pRGBAProtocol)
-                {
-                    pRGBAProtocol->setColor(m_tColor);
-                }
-            }
-        }
-    }
-}
-
-ccColor3B CCMenu::getColor(void)
-{
-    return m_tColor;
 }
 
 CCMenuItem* CCMenu::itemForTouch(CCTouch *touch)

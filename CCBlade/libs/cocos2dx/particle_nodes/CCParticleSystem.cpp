@@ -82,40 +82,40 @@ NS_CC_BEGIN
 //
 
 CCParticleSystem::CCParticleSystem()
-    :m_sPlistFile("")
-    ,m_fElapsed(0)
-    ,m_pParticles(NULL)
-    ,m_fEmitCounter(0)
-    ,m_uParticleIdx(0)
-    ,m_bIsActive(true)
-    ,m_uParticleCount(0)
-    ,m_fDuration(0)
-    ,m_tSourcePosition(CCPointZero)
-    ,m_tPosVar(CCPointZero)
-    ,m_fLife(0)
-    ,m_fLifeVar(0)
-    ,m_fAngle(0)
-    ,m_fAngleVar(0)
-    ,m_fStartSize(0)
-    ,m_fStartSizeVar(0)
-    ,m_fEndSize(0)
-    ,m_fEndSizeVar(0)
-    ,m_fStartSpin(0)
-    ,m_fStartSpinVar(0)
-    ,m_fEndSpin(0)
-    ,m_fEndSpinVar(0)
-    ,m_fEmissionRate(0)
-    ,m_uTotalParticles(0)
-    ,m_pTexture(NULL)
-    ,m_bOpacityModifyRGB(false)
-    ,m_bIsBlendAdditive(false)
-    ,m_ePositionType(kCCPositionTypeFree)
-    ,m_bIsAutoRemoveOnFinish(false)
-    ,m_nEmitterMode(kCCParticleModeGravity)
-    ,m_pBatchNode(NULL)
-    ,m_uAtlasIndex(0)
-    ,m_bTransformSystemDirty(false)
-    ,m_uAllocatedParticles(0)
+: m_sPlistFile("")
+, m_fElapsed(0)
+, m_pParticles(NULL)
+, m_fEmitCounter(0)
+, m_uParticleIdx(0)
+, m_pBatchNode(NULL)
+, m_uAtlasIndex(0)
+, m_bTransformSystemDirty(false)
+, m_uAllocatedParticles(0)
+, m_bIsActive(true)
+, m_uParticleCount(0)
+, m_fDuration(0)
+, m_tSourcePosition(CCPointZero)
+, m_tPosVar(CCPointZero)
+, m_fLife(0)
+, m_fLifeVar(0)
+, m_fAngle(0)
+, m_fAngleVar(0)
+, m_fStartSize(0)
+, m_fStartSizeVar(0)
+, m_fEndSize(0)
+, m_fEndSizeVar(0)
+, m_fStartSpin(0)
+, m_fStartSpinVar(0)
+, m_fEndSpin(0)
+, m_fEndSpinVar(0)
+, m_fEmissionRate(0)
+, m_uTotalParticles(0)
+, m_pTexture(NULL)
+, m_bOpacityModifyRGB(false)
+, m_bIsBlendAdditive(false)
+, m_ePositionType(kCCPositionTypeFree)
+, m_bIsAutoRemoveOnFinish(false)
+, m_nEmitterMode(kCCParticleModeGravity)
 {
     modeA.gravity = CCPointZero;
     modeA.speed = 0;
@@ -124,6 +124,7 @@ CCParticleSystem::CCParticleSystem()
     modeA.tangentialAccelVar = 0;
     modeA.radialAccel = 0;
     modeA.radialAccelVar = 0;
+    modeA.rotationIsDir = false;
     modeB.startRadius = 0;
     modeB.startRadiusVar = 0;
     modeB.endRadius = 0;
@@ -134,10 +135,6 @@ CCParticleSystem::CCParticleSystem()
     m_tBlendFunc.dst = CC_BLEND_DST;
 }
 // implementation CCParticleSystem
-CCParticleSystem * CCParticleSystem::particleWithFile(const char *plistFile)
-{
-    return CCParticleSystem::create(plistFile);
-}
 
 CCParticleSystem * CCParticleSystem::create(const char *plistFile)
 {
@@ -171,7 +168,7 @@ bool CCParticleSystem::init()
 bool CCParticleSystem::initWithFile(const char *plistFile)
 {
     bool bRet = false;
-    m_sPlistFile = CCFileUtils::sharedFileUtils()->fullPathFromRelativePath(plistFile);
+    m_sPlistFile = CCFileUtils::sharedFileUtils()->fullPathForFilename(plistFile);
     CCDictionary *dict = CCDictionary::createWithContentsOfFileThreadSafe(m_sPlistFile.c_str());
 
     CCAssert( dict != NULL, "Particles: file not found");
@@ -281,6 +278,9 @@ bool CCParticleSystem::initWithDictionary(CCDictionary *dictionary, const char *
                 // tangential acceleration
                 modeA.tangentialAccel = dictionary->valueForKey("tangentialAcceleration")->floatValue();
                 modeA.tangentialAccelVar = dictionary->valueForKey("tangentialAccelVariance")->floatValue();
+                
+                // rotation is dir
+                modeA.rotationIsDir = dictionary->valueForKey("rotationIsDir")->boolValue();
             }
 
             // or Mode B: radius movement
@@ -327,6 +327,13 @@ bool CCParticleSystem::initWithDictionary(CCDictionary *dictionary, const char *
                         textureName = string(dirname) + textureName;
                     }
                 }
+                else
+                {
+                    if (dirname != NULL)
+                    {
+                        textureName = string(dirname) + textureName;
+                    }
+                }
                 
                 CCTexture2D *tex = NULL;
                 
@@ -336,7 +343,6 @@ bool CCParticleSystem::initWithDictionary(CCDictionary *dictionary, const char *
                     bool bNotify = CCFileUtils::sharedFileUtils()->isPopupNotify();
                     CCFileUtils::sharedFileUtils()->setPopupNotify(false);
                     tex = CCTextureCache::sharedTextureCache()->addImage(textureName.c_str());
-                    
                     // reset the value of UIImage notify
                     CCFileUtils::sharedFileUtils()->setPopupNotify(bNotify);
                 }
@@ -438,7 +444,9 @@ bool CCParticleSystem::initWithTotalParticles(unsigned int numberOfParticles)
 
 CCParticleSystem::~CCParticleSystem()
 {
-    unscheduleUpdate();
+    // Since the scheduler retains the "target (in this case the ParticleSystem)
+	// it is not needed to call "unscheduleUpdate" here. In fact, it will be called in "cleanup"
+    //unscheduleUpdate();
     CC_SAFE_FREE(m_pParticles);
     CC_SAFE_RELEASE(m_pTexture);
 }
@@ -541,6 +549,9 @@ void CCParticleSystem::initParticle(tCCParticle* particle)
         // tangential accel
         particle->modeA.tangentialAccel = modeA.tangentialAccel + modeA.tangentialAccelVar * CCRANDOM_MINUS1_1();
 
+        // rotation is dir
+        if(modeA.rotationIsDir)
+            particle->rotation = -CC_RADIANS_TO_DEGREES(ccpToAngle(particle->modeA.dir));
     }
 
     // Mode Radius: B
@@ -894,6 +905,18 @@ float CCParticleSystem::getRadialAccelVar()
     return modeA.radialAccelVar;
 }
 
+void CCParticleSystem::setRotationIsDir(bool t)
+{
+    CCAssert( m_nEmitterMode == kCCParticleModeGravity, "Particle Mode should be Gravity");
+    modeA.rotationIsDir = t;
+}
+
+bool CCParticleSystem::getRotationIsDir()
+{
+    CCAssert( m_nEmitterMode == kCCParticleModeGravity, "Particle Mode should be Gravity");
+    return modeA.rotationIsDir;
+}
+
 void CCParticleSystem::setGravity(const CCPoint& g)
 {
     CCAssert( m_nEmitterMode == kCCParticleModeGravity, "Particle Mode should be Gravity");
@@ -1023,7 +1046,7 @@ void CCParticleSystem::setDuration(float var)
     m_fDuration = var;
 }
 
-CCPoint CCParticleSystem::getSourcePosition()
+const CCPoint& CCParticleSystem::getSourcePosition()
 {
     return m_tSourcePosition;
 }
@@ -1033,7 +1056,7 @@ void CCParticleSystem::setSourcePosition(const CCPoint& var)
     m_tSourcePosition = var;
 }
 
-CCPoint CCParticleSystem::getPosVar()
+const CCPoint& CCParticleSystem::getPosVar()
 {
     return m_tPosVar;
 }
@@ -1123,7 +1146,7 @@ void CCParticleSystem::setEndSizeVar(float var)
     m_fEndSizeVar = var;
 }
 
-ccColor4F CCParticleSystem::getStartColor()
+const ccColor4F& CCParticleSystem::getStartColor()
 {
     return m_tStartColor;
 }
@@ -1133,7 +1156,7 @@ void CCParticleSystem::setStartColor(const ccColor4F& var)
     m_tStartColor = var;
 }
 
-ccColor4F CCParticleSystem::getStartColorVar()
+const ccColor4F& CCParticleSystem::getStartColorVar()
 {
     return m_tStartColorVar;
 }
@@ -1143,7 +1166,7 @@ void CCParticleSystem::setStartColorVar(const ccColor4F& var)
     m_tStartColorVar = var;
 }
 
-ccColor4F CCParticleSystem::getEndColor()
+const ccColor4F& CCParticleSystem::getEndColor()
 {
     return m_tEndColor;
 }
@@ -1153,7 +1176,7 @@ void CCParticleSystem::setEndColor(const ccColor4F& var)
     m_tEndColor = var;
 }
 
-ccColor4F CCParticleSystem::getEndColorVar()
+const ccColor4F& CCParticleSystem::getEndColorVar()
 {
     return m_tEndColorVar;
 }

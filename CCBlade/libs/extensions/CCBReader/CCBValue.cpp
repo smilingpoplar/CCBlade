@@ -21,7 +21,7 @@ ccColor3BWapper* ccColor3BWapper::create(const ccColor3B& color)
     return ret;
 }
 
-ccColor3B ccColor3BWapper::getColor()
+const ccColor3B& ccColor3BWapper::getColor() const
 {
     return color;
 }
@@ -80,18 +80,33 @@ CCBValue* CCBValue::create(unsigned char byte)
     return ret;
 }
 
-CCBValue* CCBValue::create(const void *pPointer)
+CCBValue* CCBValue::create(const char *pStringValue)
 {
     CCBValue *ret = new CCBValue();
     if (ret)
     {
-        ret->mValue.pointer = pPointer;
-        ret->mType = kPointerValue;
+        ret->m_strValue = pStringValue;
+        ret->mType = kStringValue;
         ret->autorelease();
     }
     
     return ret;
 }
+
+
+CCBValue* CCBValue::create(CCArray *pArrValue)
+{
+    CCBValue *ret = new CCBValue();
+    if (ret)
+    {
+        ret->m_arrValue = pArrValue;
+        ret->mType = kArrayValue;
+        ret->autorelease();
+    }
+    
+    return ret;
+}
+
 
 int CCBValue::getIntValue()
 {
@@ -116,16 +131,28 @@ bool CCBValue::getBoolValue()
 
 unsigned char CCBValue::getByteValue()
 {
-    assert(mType = kUnsignedCharValue);
+    assert(mType == kUnsignedCharValue);
     
     return (unsigned char)(mValue.nValue);
 }
 
-const void* CCBValue::getPointer()
-{
-    assert(mType == kPointerValue);
+CCArray* CCBValue::getArrayValue() {
+    assert(mType == kArrayValue);
     
-    return mValue.pointer;
+    return m_arrValue;
+}
+
+
+const char* CCBValue::getStringValue()
+{
+    assert(mType == kStringValue);
+    
+    return m_strValue.c_str();
+}
+
+int CCBValue::getType()
+{
+    return mType;
 }
 
 NS_CC_EXT_END

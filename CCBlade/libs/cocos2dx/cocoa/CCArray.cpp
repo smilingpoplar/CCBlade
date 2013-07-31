@@ -24,6 +24,7 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "CCArray.h"
+#include "platform/CCFileUtils.h"
 
 NS_CC_BEGIN
 
@@ -38,11 +39,6 @@ CCArray::CCArray(unsigned int capacity)
 : data(NULL)
 {
     initWithCapacity(capacity);
-}
-
-CCArray* CCArray::array()
-{
-    return CCArray::create();
 }
 
 CCArray* CCArray::create()
@@ -61,11 +57,6 @@ CCArray* CCArray::create()
     return pArray;
 }
 
-CCArray* CCArray::arrayWithObject(CCObject* pObject)
-{
-    return CCArray::createWithObject(pObject);
-}
-
 CCArray* CCArray::createWithObject(CCObject* pObject)
 {
     CCArray* pArray = new CCArray();
@@ -79,32 +70,6 @@ CCArray* CCArray::createWithObject(CCObject* pObject)
         CC_SAFE_DELETE(pArray);
     }
 
-    return pArray;
-}
-
-CCArray* CCArray::arrayWithObjects(CCObject* pObject, ...)
-{
-    va_list args;
-    va_start(args,pObject);
-    
-    CCArray* pArray = create();
-    if (pArray && pObject)
-    {
-        pArray->addObject(pObject);
-        CCObject *i = va_arg(args, CCObject*);
-        while(i) 
-        {
-            pArray->addObject(i);
-            i = va_arg(args, CCObject*);
-        }
-    }
-    else
-    {
-        CC_SAFE_DELETE(pArray);
-    }
-
-    va_end(args);
-    
     return pArray;
 }
 
@@ -134,15 +99,17 @@ CCArray* CCArray::create(CCObject* pObject, ...)
     return pArray;
 }
 
-CCArray* CCArray::arrayWithCapacity(unsigned int capacity)
+CCArray* CCArray::createWithArray(CCArray* otherArray)
 {
-    return CCArray::createWithCapacity(capacity);
+    CCArray* pRet = (CCArray*)otherArray->copy();
+    pRet->autorelease();
+    return pRet;
 }
 
 CCArray* CCArray::createWithCapacity(unsigned int capacity)
 {
     CCArray* pArray = new CCArray();
-
+    
     if (pArray && pArray->initWithCapacity(capacity))
     {
         pArray->autorelease();
@@ -151,25 +118,8 @@ CCArray* CCArray::createWithCapacity(unsigned int capacity)
     {
         CC_SAFE_DELETE(pArray);
     }
-
+    
     return pArray;
-}
-
-CCArray* CCArray::arrayWithArray(CCArray* otherArray)
-{
-    return CCArray::createWithArray(otherArray);
-}
-
-CCArray* CCArray::createWithArray(CCArray* otherArray)
-{
-    CCArray* pRet = (CCArray*)otherArray->copy();
-    pRet->autorelease();
-    return pRet;
-}
-
-CCArray* CCArray::arrayWithContentsOfFile(const char* pFileName)
-{
-    return CCArray::createWithContentsOfFile(pFileName);
 }
 
 CCArray* CCArray::createWithContentsOfFile(const char* pFileName)
@@ -182,16 +132,9 @@ CCArray* CCArray::createWithContentsOfFile(const char* pFileName)
     return pRet;
 }
 
-extern CCArray* ccFileUtils_arrayWithContentsOfFileThreadSafe(const char* pFileName);
-
-CCArray* CCArray::arrayWithContentsOfFileThreadSafe(const char* pFileName)
-{
-    return CCArray::createWithContentsOfFileThreadSafe(pFileName);
-}
-
 CCArray* CCArray::createWithContentsOfFileThreadSafe(const char* pFileName)
 {
-    return ccFileUtils_arrayWithContentsOfFileThreadSafe(pFileName);
+    return CCFileUtils::sharedFileUtils()->createCCArrayWithContentsOfFile(pFileName);
 }
 
 bool CCArray::init()
@@ -217,26 +160,21 @@ bool CCArray::initWithObjects(CCObject* pObject, ...)
     bool bRet = false;
     do 
     {
-        CC_BREAK_IF(pObject != NULL);
+        CC_BREAK_IF(pObject == NULL);
 
         va_list args;
         va_start(args, pObject);
 
-        CCArray* pArray = new CCArray();
-        if (pArray && pObject)
+        if (pObject)
         {
-            pArray->addObject(pObject);
+            this->addObject(pObject);
             CCObject* i = va_arg(args, CCObject*);
             while(i) 
             {
-                pArray->addObject(i);
+                this->addObject(i);
                 i = va_arg(args, CCObject*);
             }
             bRet = true;
-        }
-        else
-        {
-            CC_SAFE_DELETE(pArray);
         }
         va_end(args);
 
@@ -267,17 +205,17 @@ bool CCArray::initWithArray(CCArray* otherArray)
     return bRet;
 }
 
-unsigned int CCArray::count()
+unsigned int CCArray::count() const
 {
     return data->num;
 }
 
-unsigned int CCArray::capacity()
+unsigned int CCArray::capacity() const
 {
     return data->max;
 }
 
-unsigned int CCArray::indexOfObject(CCObject* object)
+unsigned int CCArray::indexOfObject(CCObject* object) const
 {
     return ccArrayGetIndexOfObject(data, object);
 }
@@ -314,7 +252,7 @@ CCObject* CCArray::randomObject()
     return data->arr[(int)(data->num * r)];
 }
 
-bool CCArray::containsObject(CCObject* object)
+bool CCArray::containsObject(CCObject* object) const
 {
     return ccArrayContainsObject(data, object);
 }
@@ -451,6 +389,11 @@ CCObject* CCArray::copyWithZone(CCZone* pZone)
         pTmpObj->release();
     }
     return pArray;
+}
+
+void CCArray::acceptVisitor(CCDataVisitor &visitor)
+{
+    visitor.visit(this);
 }
 
 NS_CC_END
